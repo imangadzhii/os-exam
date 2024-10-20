@@ -1,0 +1,176 @@
+# comparing two strings
+read -p "string 1:" str1
+read -p "string 2:" str2
+
+if [ "$str1" == "$str2"];then
+    echo "The strings are same"
+else
+    echo "The strings are different"
+fi
+--------------------------------------------------------------------------------------------------------------------------------
+#lower to upper case conversion
+read -p "input string: " strvalue
+
+lwer=$(echo "$strvalue" | tr '[:lower:]' '[:upper:]')
+echo "$lwer"
+-------------------------------------------------------------------------------------------------------------------------------
+#upper to lower case conversion
+read -p "input string: " strvalue
+upr=$(echo "$strvalue" | tr '[:upper:]' '[:lower:]')
+echo "$upr"
+-------------------------------------------------------------------------------------------------------------------------------
+#factorial of a number
+read -p "Enter any positive number::" var1
+factorial=1
+if test $var1 -gt 0;then
+    for((i=1; i<=var1; i++));do
+        factorial=$((factorial * i))
+    done
+fi    
+echo "factorial of $var1 is $factorial"
+-----------------------------------------------------------------------------------------------------------
+# System information
+echo "System information $(hostname)"
+echo "---------------------------------------------------------"
+echo "Operation system and kernal version:"
+uname -a
+echo "--------------------------------------------------------"
+echo "CPU Information:::"
+lscpu | grep 'Model name'
+lscpu | grep 'CPU MHz'
+lscpu | grep 'Architecture'
+echo "-----------------------------------------------------------"
+echo "Network:::"
+ip addr show
+echo "------------------------------------"
+echo "Disk usuage"
+df -h
+echo "-----------------------------------------------------------"
+fcfs in c
+#include <stdio.h>
+
+int main() {
+    int n, i, j;
+    int burst_time[20], wait_time[20], turn_around_time[20];
+    int total_wait = 0, total_turnaround = 0;
+    
+    // Input the number of processes
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    
+    // Input burst times for each process
+    printf("Enter burst time for each process:\n");
+    for (i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d", &burst_time[i]);
+    }
+    
+    // Calculate waiting time for each process
+    wait_time[0] = 0; // The first process has no waiting time
+    for (i = 1; i < n; i++) {
+        wait_time[i] = 0;
+        for (j = 0; j < i; j++) {
+            wait_time[i] += burst_time[j];
+        }
+    }
+    
+    // Calculate turnaround time for each process
+    for (i = 0; i < n; i++) {
+        turn_around_time[i] = burst_time[i] + wait_time[i];
+        total_wait += wait_time[i];
+        total_turnaround += turn_around_time[i];
+    }
+    
+    // Output results
+    printf("\nProcess\t\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (i = 0; i < n; i++) {
+        printf("P[%d]\t\t%d\t\t%d\t\t%d\n", i + 1, burst_time[i], wait_time[i], turn_around_time[i]);
+    }
+    
+    // Calculate and display average waiting time and turnaround time
+    float avg_wait_time = (float)total_wait / n;
+    float avg_turnaround_time = (float)total_turnaround / n;
+    printf("\nAverage Waiting Time: %.2f", avg_wait_time);
+    printf("\nAverage Turnaround Time: %.2f\n", avg_turnaround_time);
+    
+    return 0;
+}
+------------------------------------------------------------------------------------------
+sjf 
+#include <stdio.h>
+
+struct Process {
+    int pid;       // Process ID
+    int burst_time; // Burst Time
+    int waiting_time; // Waiting Time
+    int turnaround_time; // Turnaround Time
+};
+
+void findWaitingTime(struct Process proc[], int n) {
+    proc[0].waiting_time = 0; // First process has 0 waiting time
+
+    // Calculating waiting time for each process
+    for (int i = 1; i < n; i++) {
+        proc[i].waiting_time = proc[i - 1].waiting_time + proc[i - 1].burst_time;
+    }
+}
+
+void findTurnaroundTime(struct Process proc[], int n) {
+    // Turnaround time = burst time + waiting time
+    for (int i = 0; i < n; i++) {
+        proc[i].turnaround_time = proc[i].burst_time + proc[i].waiting_time;
+    }
+}
+
+void sortProcessesByBurstTime(struct Process proc[], int n) {
+    // Sort processes based on burst time using simple bubble sort
+    struct Process temp;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - 1 - i; j++) {
+            if (proc[j].burst_time > proc[j + 1].burst_time) {
+                temp = proc[j];
+                proc[j] = proc[j + 1];
+                proc[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void findAverageTime(struct Process proc[], int n) {
+    findWaitingTime(proc, n);
+    findTurnaroundTime(proc, n);
+
+    int total_waiting_time = 0, total_turnaround_time = 0;
+
+    printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
+
+    for (int i = 0; i < n; i++) {
+        total_waiting_time += proc[i].waiting_time;
+        total_turnaround_time += proc[i].turnaround_time;
+        printf("%d\t%d\t\t%d\t\t%d\n", proc[i].pid, proc[i].burst_time, proc[i].waiting_time, proc[i].turnaround_time);
+    }
+
+    printf("\nAverage Waiting Time = %.2f", (float)total_waiting_time / n);
+    printf("\nAverage Turnaround Time = %.2f\n", (float)total_turnaround_time / n);
+}
+
+int main() {
+    int n;
+    
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    struct Process proc[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter burst time for process %d: ", i + 1);
+        proc[i].pid = i + 1;
+        scanf("%d", &proc[i].burst_time);
+    }
+
+    sortProcessesByBurstTime(proc, n); // Sort processes by burst time
+
+    findAverageTime(proc, n); // Calculate and display average waiting time and turnaround time
+
+    return 0;
+}
