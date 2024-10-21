@@ -273,4 +273,74 @@ int main() {
 
     return 0;
 }
+-----------------------------------------------------------------------------------------------------------------------
+
+producer and consumer
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define BUFFER_SIZE 5  // Buffer size
+
+int buffer[BUFFER_SIZE];  // Shared buffer
+int in = 0;  // Index for producer
+int out = 0;  // Index for consumer
+
+sem_t empty;  // Semaphore for empty slots
+sem_t full;   // Semaphore for full slots
+
+pthread_mutex_t mutex;  // Mutex for buffer access
+
+// Producer thread
+void* producer(void* arg) {
+    while (1) {
+        int item = rand() % 100;  // Produce item
+        sem_wait(&empty);  // Wait for an empty slot
+        pthread_mutex_lock(&mutex);  // Lock the buffer
+
+        buffer[in] = item;  // Add item to buffer
+        printf("Produced: %d\n", item);
+        in = (in + 1) % BUFFER_SIZE;  // Update producer index
+
+        pthread_mutex_unlock(&mutex);  // Unlock buffer
+        sem_post(&full);  // Signal a full slot
+        sleep(1);  // Simulate delay
+    }
+}
+
+// Consumer thread
+void* consumer(void* arg) {
+    while (1) {
+        sem_wait(&full);  // Wait for a full slot
+        pthread_mutex_lock(&mutex);  // Lock the buffer
+
+        int item = buffer[out];  // Remove item from buffer
+        printf("Consumed: %d\n", item);
+        out = (out + 1) % BUFFER_SIZE;  // Update consumer index
+
+        pthread_mutex_unlock(&mutex);  // Unlock buffer
+        sem_post(&empty);  // Signal an empty slot
+        sleep(2);  // Simulate delay
+    }
+}
+
+int main() {
+    pthread_t prod, cons;  // Producer and consumer threads
+
+    // Initialize semaphores and mutex
+    sem_init(&empty, 0, BUFFER_SIZE);  // Initially, buffer has BUFFER_SIZE empty slots
+    sem_init(&full, 0, 0);  // Initially, buffer has 0 full slots
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create producer and consumer threads
+    pthread_create(&prod, NULL, producer, NULL);
+    pthread_create(&cons, NULL, consumer, NULL);
+
+    // Wait for the threads (they run indefinitely in this example)
+    pthread_join(prod, NULL);
+    pthread_join(cons, NULL);
+
+    return 0;
+}
+--------------------------------------------------------------------------------------------------------------------
 
